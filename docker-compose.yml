@@ -6,8 +6,13 @@ services:
       - "8080:80"
     depends_on:
       - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=batik_rental
+      - DB_USER=root
+      - DB_PASS=root
+      - DB_PORT=3306
     restart: unless-stopped
-
   db:
     image: mysql:8.0
     container_name: batik-rental-db
@@ -20,6 +25,5 @@ services:
     ports:
       - "3306:3306"
     restart: unless-stopped
-
 volumes:
   db_data:
