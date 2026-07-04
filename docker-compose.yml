@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    container_name: batik-rental-app
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: batik-rental-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=batik_rental
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/batik.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+volumes:
+  db_data:

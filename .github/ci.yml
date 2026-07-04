@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: batik_rental
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: batik_rental
+      DB_USER: root
+      DB_PASS: root
+      DB_PORT: 3306
+      APP_URL: http://127.0.0.1:8000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql, mbstring
+          tools: composer
+
+      - name: Lint all PHP files (php -l)
+        run: |
+          find . -name "*.php" -not -path "./vendor/*" -print0 \
+            | xargs -0 -n1 -I{} php -l "{}"
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if mysqladmin ping -h127.0.0.1 -P3306 -uroot -proot --silent; then
+              echo "MySQL is up"
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Import database schema (if present)
+        run: |
+          if [ -f schema.sql ]; then
+            mysql -h127.0.0.1 -P3306 -uroot -proot batik_rental < schema.sql
+          else
+            echo "No schema.sql found, skipping import."
+          fi
+
+      - name: Start PHP built-in server
+        run: |
+          php -S 127.0.0.1:8000 -t . > server.log 2>&1 &
+          sleep 2
+
+      - name: Run test suite
+        run: php tests/test_home.php
+
+      - name: Show server log on failure
+        if: failure()
+        run: cat server.log || true
