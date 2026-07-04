@@ -36,7 +36,7 @@ echo "== Unit test: formatRupiah() ==\n";
 
 require_once __DIR__ . '/../koneksi.php';
 
-check('formatRupiah(15000) === "Rp15.000"', formatRupiah(15000) === 'RpSALAH');
+check('formatRupiah(15000) === "Rp15.000"', formatRupiah(15000) === 'Rp15.000');
 check('formatRupiah(0) === "Rp0"', formatRupiah(0) === 'Rp0');
 check('formatRupiah(1234567) === "Rp1.234.567"', formatRupiah(1234567) === 'Rp1.234.567');
 
