@@ -5,25 +5,39 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DB_HOST=db
-      - DB_NAME=batik_rental
-      - DB_USER=root
-      - DB_PASS=root
-      - DB_PORT=3306
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_PORT=${DB_PORT}
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/index.php"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
   db:
     image: mysql:8.0
     container_name: batik-rental-db
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=batik_rental
+      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
     volumes:
       - db_data:/var/lib/mysql
       - ./database/batik.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "3306:3306"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   db_data:

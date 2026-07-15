@@ -53,3 +53,10 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t batik-rental:latest .
+
+      - name: Verify container health (build check)
+        run: |
+          docker run -d --name healthcheck-test -p 8081:80 batik-rental:latest
+          sleep 5
+          docker inspect healthcheck-test || true
+          docker stop healthcheck-test

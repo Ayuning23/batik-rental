@@ -2,4 +2,4 @@ vendor/
    node_modules/
    *.log
    .vscode/
-   .DS_Store
+   .DS_Store.env
