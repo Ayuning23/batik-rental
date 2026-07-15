@@ -1,5 +1,6 @@
 vendor/
-   node_modules/
-   *.log
-   .vscode/
-   .DS_Store.env
+node_modules/
+*.log
+.vscode/
+.DS_Store
+.env

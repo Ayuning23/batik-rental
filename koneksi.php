@@ -16,6 +16,7 @@ try {
         ]
     );
 } catch (PDOException $e) {
+    http_response_code(500);
     die("Koneksi database gagal: " . $e->getMessage());
 }
 function formatRupiah($angka) {
